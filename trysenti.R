@@ -1,0 +1,16 @@
+load("C:/Users/Administrator/Downloads/data_for_lection_10.Rdata")
+require(tibble)
+a<-c(1:length(query.results))
+raw<-tibble(id=sapply(a,function(i)query.results[[i]]$id),
+            text=sapply(a,function(i)query.results[[i]]$text),
+            timestamp=sapply(a,function(i)query.results[[i]]$created))
+raw$text<-iconv(raw$text,to="utf-8",sub="")
+raw$timestamp<-as.Date(as.POSIXct(raw$timestamp,
+                                  origin="1970-01-01"))
+require(SentimentAnalysis)
+raw$sentimentGI<-analyzeSentiment(raw$text)$SentimentGI
+plot(x=raw$sentimentGI,
+     y=raw$timestamp)
+Sys.setlocale("LC_TIME","English")
+daily.sentiment<-aggregate(raw$sentimentGI,by=list(raw$timestamp),mean)
+plot(x=daily.sentiment,raw$timestamp,type="l")
